@@ -6,24 +6,38 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"reflect"
 )
 
-var cells map[int]cell
+var cells map[int]*cell
+var chs map[int]chan int
+
+func init() {
+	cells = make(map[int]*cell)
+	chs = make(map[int]chan int)
+}
 
 type cell struct {
-	ID   int
-	Over int
-	Next []weight
-	Pre  []weight
-	Ch   [100]chan int
-	Head map[int]weight
+	ID       int         //id
+	Over     int         //阈值(多少个链接发出)
+	Nextwith map[int]int //上个连接 id-id
+	Prewith  map[int]int //下个连接 id-id
+	//需要一个集合
+	//Nextwit	 map[]
+	//Input [100]chan int //输入
+	Depth int //深度
 }
 
-type weight struct {
-	ID     int
-	Weight int
+func upcell(id int) {
+	cells[id] = new(cell)
+	ch := make(chan int, 10)
+	var sig int
+	//for {
+	sig = <-ch
+	//}
+	fmt.Println(sig)
+	return
 }
-
 func hello() {
 	fmt.Println("Hello World!")
 	return
@@ -47,8 +61,18 @@ func httpGet() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println(ret)
+	for v := range ret.([]interface{}) {
 
+		//fmt.Println(ret.([]interface{})[v])
+		if ret.([]interface{})[v] == nil {
+			continue
+		}
+		fmt.Print("\t")
+		fmt.Println(reflect.TypeOf(ret.([]interface{})[v]).String())
+	}
+
+	//fmt.Println(ret)
+	//fmt.Println(reflect.TypeOf(ret).String())
 }
 func json2map(str []byte) (s interface{}, err error) {
 	var result interface{}
